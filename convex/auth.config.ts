@@ -1,12 +1,14 @@
-if (!process.env.CLERK_ISSUE_URL){
-    throw new Error("CLERK_ISSUE_URL is not set in enviroment variables")
+// Keep the old spelling as a fallback for existing deployments.
+const issuer = process.env.CLERK_JWT_ISSUER_DOMAIN || process.env.CLERK_ISSUE_URL;
+if (!issuer){
+    throw new Error("Set CLERK_JWT_ISSUER_DOMAIN in the Convex deployment environment")
 }
 
 
 const authConfig = {
     providers: [
       {
-        domain: process.env.CLERK_ISSUE_URL,
+        domain: issuer,
         applicationID: "convex",
       },
     ]

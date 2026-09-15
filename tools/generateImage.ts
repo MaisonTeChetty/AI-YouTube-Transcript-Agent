@@ -1,6 +1,6 @@
 import { dalleImageGeneration } from "@/actions/dalleImageGeneration";
 import { FeatureFlag } from "@/features/flags";
-import { client } from "@/lib/schematic";
+import { getSchematicClient } from "@/lib/schematic";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -19,7 +19,7 @@ export const generateImage = (videoId: string, userId:string) =>
                 id: userId,
             }
           }
-      const isImageGenerationEnabled = await client.checkFlag(
+      const isImageGenerationEnabled = await getSchematicClient().checkFlag(
         schematicCtx,
         FeatureFlag.IMAGE_GENERATION
       );

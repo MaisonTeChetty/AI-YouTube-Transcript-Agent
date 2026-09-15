@@ -5,7 +5,7 @@ import { Doc } from "@/convex/_generated/dataModel";
 import { FeatureFlag, featureFlagEvents } from "@/features/flags";
 import { checkFeatureUsageLimit } from "@/lib/checkFeatureUsageLimit";
 import { getConvexClient } from "@/lib/convex";
-import { client } from "@/lib/schematic";
+import { getSchematicClient } from "@/lib/schematic";
 import { currentUser } from "@clerk/nextjs/server";
 
 
@@ -33,7 +33,7 @@ export const createOrGetVideo = async (
     user.id,
     featureFlagEvents[FeatureFlag.ANALYSE_VIDEO].event
   );
-  
+
   if (!featureCheck.success) {
     return {
       success: false,
@@ -52,7 +52,7 @@ export const createOrGetVideo = async (
         console.log(
           `🔍 Analyse event for video ${videoId} – Token will be spent`
         );
-      
+
         const newVideoId = await convex.mutation(api.videos.createVideoEntry, {
           videoId,
           userId,
@@ -64,7 +64,7 @@ export const createOrGetVideo = async (
           });
 
         console.log("Tracking analyse video event...");
-            await client.track({
+            await getSchematicClient().track({
             event: featureFlagEvents[FeatureFlag.ANALYSE_VIDEO].event,
             company: {
                 id: userId,
@@ -73,7 +73,7 @@ export const createOrGetVideo = async (
                 id: userId,
             },
             });
-      
+
             return {
                 success: true,
                 data: newVideo!,
@@ -85,7 +85,7 @@ export const createOrGetVideo = async (
           data: video,
         };
       }
-      
+
 
 
   } catch (error) {
@@ -95,6 +95,6 @@ export const createOrGetVideo = async (
       error: "An unexpected error occurred. Please try again later.",
     };
   }
-  
-  
+
+
 };

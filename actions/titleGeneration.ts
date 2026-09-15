@@ -3,11 +3,10 @@
 import { api } from "@/convex/_generated/api";
 import { FeatureFlag, featureFlagEvents } from "@/features/flags";
 import { getConvexClient } from "@/lib/convex";
-import { client } from "@/lib/schematic";
+import { getSchematicClient } from "@/lib/schematic";
 import { currentUser } from "@clerk/nextjs/server";
 import OpenAI from "openai";
 
-const convexClient = getConvexClient();
 
 export async function titleGeneration(
   videoId: string,
@@ -15,6 +14,7 @@ export async function titleGeneration(
   considerations: string
 ) {
   const user = await currentUser();
+  const convexClient = getConvexClient();
 
   if (!user?.id) {
     throw new Error("User not found");
@@ -28,7 +28,7 @@ export async function titleGeneration(
     console.log("📺 Video summary:", videoSummary);
     console.log("🎬 Generating title for videoId:", videoId);
     console.log("📝 Considerations:", considerations);
-  
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -61,7 +61,7 @@ export async function titleGeneration(
         title: title,
         });
 
-        await client.track({
+        await getSchematicClient().track({
             event: featureFlagEvents[FeatureFlag.TITLE_GENERATIONS].event,
             company: {
               id: user.id,
@@ -70,14 +70,14 @@ export async function titleGeneration(
               id: user.id,
             },
           });
-          
+
           console.log("✨ Title generated:", title);
-          
+
 
 
   } catch (error) {
     console.error("❌ Error generating title:", error);
     throw new Error("Failed to generate title");
   }
-  
+
 }

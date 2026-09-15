@@ -7,8 +7,8 @@ function ManagePlan() {
       <p className="text-gray-600 mb-8">
         Manage your subscription and billing details here.
       </p>
-      
-      <SchematicComponent componentId="cmpn_RkaagDZ8iTV" />
+
+      <SchematicComponent componentId={process.env.NEXT_PUBLIC_SCHEMATIC_COMPONENT_ID || ""} />
     </div>
   );
 }

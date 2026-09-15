@@ -3,15 +3,15 @@
 import { api } from "@/convex/_generated/api";
 import { FeatureFlag, featureFlagEvents } from "@/features/flags";
 import { getConvexClient } from "@/lib/convex";
-import { client } from "@/lib/schematic";
+import { getSchematicClient } from "@/lib/schematic";
 import { currentUser } from "@clerk/nextjs/server";
 import {OpenAI} from "openai"
 
-const IMAGE_SIZE = "1792x1024" as const;
-const convexClient = getConvexClient();
+import { generateThumbnailImage } from "@/lib/imageGeneration";
 
 export const dalleImageGeneration = async (prompt: string, videoId: string) => {
   const user = await currentUser();
+  const convexClient = getConvexClient();
 
   if (!user?.id) {
     throw new Error("User not found");
@@ -24,34 +24,15 @@ export const dalleImageGeneration = async (prompt: string, videoId: string) => {
   if (!prompt) {
     throw new Error("Failed to generate image prompt");
   }
-  
+
   console.log("🛠️ Generating image with prompt:", prompt);
-  
-  // Generate the image using DALL·E
-  const imageResponse = await openai.images.generate({
-    model: "dall-e-3",
-    prompt: prompt,
-    n: 1,
-    size: IMAGE_SIZE,
-    quality: "standard",
-    style: "vivid",
-  });
 
-  const imageUrl = imageResponse.data[0]?.url
+  const image = await generateThumbnailImage(openai, prompt);
 
-  if (!imageUrl) {
-    throw new Error("Failed to generate image")
-  }
-  
 // Step 1: Get a short-lived upload URL for Convex
     console.log("📡 Getting upload URL...");
     const postUrl = await convexClient.mutation(api.images.generateUploadUrl);
     console.log("✅ Got upload URL");
-
-// Step 2: Download the image from the URL
-    console.log("📥 Downloading image from OpenAI...");
-    const image: Blob = await fetch(imageUrl).then((res) => res.blob());
-    console.log("✅ Downloaded image successfully");
 
 // Step 3: Upload the image to the convex storage bucket
     console.log("📤 Uploading image to storage...");
@@ -61,6 +42,7 @@ export const dalleImageGeneration = async (prompt: string, videoId: string) => {
     body: image,
     });
 
+    if (!result.ok) throw new Error("Failed to upload the generated image");
     const { storageId } = await result.json();
     console.log("✅ Uploaded image to storage with ID:", storageId);
 
@@ -80,7 +62,7 @@ export const dalleImageGeneration = async (prompt: string, videoId: string) => {
     })
 
     // Track the image generation event
-        await client.track({
+        await getSchematicClient().track({
             event: featureFlagEvents[FeatureFlag.IMAGE_GENERATION].event,
             company: {
             id: user.id,
@@ -89,11 +71,11 @@ export const dalleImageGeneration = async (prompt: string, videoId: string) => {
             id: user.id,
             },
         });
-        
+
         return {
             imageUrl: dbImageUrl,
         };
-        
+
 
 
 };

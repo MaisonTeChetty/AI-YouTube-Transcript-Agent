@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
         protocol: "https"
       },
       {
-        hostname: "notable-impala-714.convex.cloud",
+        hostname: "*.convex.cloud",
         protocol: "https"
       }
     ]

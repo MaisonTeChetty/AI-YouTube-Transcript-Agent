@@ -1,3 +1,5 @@
+[Local setup and environment recovery](SETUP.md)
+
 🎥 AI Video Agent
 
 Live Demo: https://ai-agent-gamma-beryl.vercel.app

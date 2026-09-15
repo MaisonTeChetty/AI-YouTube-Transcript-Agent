@@ -1,4 +1,4 @@
-import { client } from "@/lib/schematic";
+import { getSchematicClient } from "@/lib/schematic";
 import { featureFlagEvents} from "@/features/flags";
 
 export async function checkFeatureUsageLimit(
@@ -6,7 +6,7 @@ export async function checkFeatureUsageLimit(
   eventSubtype: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const entitlements = await client.entitlements.getFeatureUsageByCompany({
+    const entitlements = await getSchematicClient().entitlements.getFeatureUsageByCompany({
       keys: {
         id: userId,
       },
